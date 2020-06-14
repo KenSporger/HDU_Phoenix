@@ -5,6 +5,8 @@
 #include "general.h"
 #include <opencv2/ml.hpp>
 
+#define GET_ARMOR_PIC
+#define SHOW_RESULT
 enum
 {
 	WIDTH_GREATER_THAN_HEIGHT,

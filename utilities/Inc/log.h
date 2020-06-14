@@ -49,7 +49,7 @@ public:
   {
     google::InitGoogleLogging(program);
     FLAGS_stderrthreshold = google::INFO;
-    FLAGS_log_dir = "/home/nuc/HDU_Phoenix/logs";
+    FLAGS_log_dir = "/home/ken/Documents/HDU_Phoenix/logs";
     FLAGS_colorlogtostderr = true;
     FLAGS_v = 3;
     google::InstallFailureSignalHandler();

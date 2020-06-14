@@ -1,0 +1,4 @@
+Log file created at: 2020/06/14 10:55:01
+Running on machine: desktop
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20200614 10:55:01.423754  7647 test.cpp:79] arm begin
