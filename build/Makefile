@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nuc/HDU_Phoenix
+CMAKE_SOURCE_DIR = /home/ken/Documents/HDU_Phoenix
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nuc/HDU_Phoenix/build
+CMAKE_BINARY_DIR = /home/ken/Documents/HDU_Phoenix/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/nuc/HDU_Phoenix/build/CMakeFiles /home/nuc/HDU_Phoenix/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ken/Documents/HDU_Phoenix/build/CMakeFiles /home/ken/Documents/HDU_Phoenix/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/nuc/HDU_Phoenix/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ken/Documents/HDU_Phoenix/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -258,33 +258,6 @@ main/Src/img_buffer.cpp.s:
 	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/main/Src/img_buffer.cpp.s
 .PHONY : main/Src/img_buffer.cpp.s
 
-main2.o: main2.cpp.o
-
-.PHONY : main2.o
-
-# target to build an object file
-main2.cpp.o:
-	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/main2.cpp.o
-.PHONY : main2.cpp.o
-
-main2.i: main2.cpp.i
-
-.PHONY : main2.i
-
-# target to preprocess a source file
-main2.cpp.i:
-	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/main2.cpp.i
-.PHONY : main2.cpp.i
-
-main2.s: main2.cpp.s
-
-.PHONY : main2.s
-
-# target to generate assembly for a file
-main2.cpp.s:
-	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/main2.cpp.s
-.PHONY : main2.cpp.s
-
 serials/Src/serial.o: serials/Src/serial.cpp.o
 
 .PHONY : serials/Src/serial.o
@@ -311,6 +284,33 @@ serials/Src/serial.s: serials/Src/serial.cpp.s
 serials/Src/serial.cpp.s:
 	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/serials/Src/serial.cpp.s
 .PHONY : serials/Src/serial.cpp.s
+
+test.o: test.cpp.o
+
+.PHONY : test.o
+
+# target to build an object file
+test.cpp.o:
+	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/test.cpp.o
+.PHONY : test.cpp.o
+
+test.i: test.cpp.i
+
+.PHONY : test.i
+
+# target to preprocess a source file
+test.cpp.i:
+	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/test.cpp.i
+.PHONY : test.cpp.i
+
+test.s: test.cpp.s
+
+.PHONY : test.s
+
+# target to generate assembly for a file
+test.cpp.s:
+	$(MAKE) -f CMakeFiles/RM_CV.dir/build.make CMakeFiles/RM_CV.dir/test.cpp.s
+.PHONY : test.cpp.s
 
 utilities/Src/opencv_extend.o: utilities/Src/opencv_extend.cpp.o
 
@@ -363,12 +363,12 @@ help:
 	@echo "... main/Src/img_buffer.o"
 	@echo "... main/Src/img_buffer.i"
 	@echo "... main/Src/img_buffer.s"
-	@echo "... main2.o"
-	@echo "... main2.i"
-	@echo "... main2.s"
 	@echo "... serials/Src/serial.o"
 	@echo "... serials/Src/serial.i"
 	@echo "... serials/Src/serial.s"
+	@echo "... test.o"
+	@echo "... test.i"
+	@echo "... test.s"
 	@echo "... utilities/Src/opencv_extend.o"
 	@echo "... utilities/Src/opencv_extend.i"
 	@echo "... utilities/Src/opencv_extend.s"

@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=gnu++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/nuc/HDU_Phoenix/buff/Inc -I/home/nuc/HDU_Phoenix/camera/cam_inc -I/home/nuc/HDU_Phoenix/camera/Inc -I/home/nuc/HDU_Phoenix/armor/Inc -I/home/nuc/HDU_Phoenix/main/Inc -I/home/nuc/HDU_Phoenix/serials/Inc -I/home/nuc/HDU_Phoenix/general/Inc -I/home/nuc/HDU_Phoenix/utilities/Inc -isystem /usr/local/include/opencv4 
+CXX_INCLUDES = -I/home/ken/Documents/HDU_Phoenix/buff/Inc -I/home/ken/Documents/HDU_Phoenix/camera/cam_inc -I/home/ken/Documents/HDU_Phoenix/camera/Inc -I/home/ken/Documents/HDU_Phoenix/armor/Inc -I/home/ken/Documents/HDU_Phoenix/main/Inc -I/home/ken/Documents/HDU_Phoenix/serials/Inc -I/home/ken/Documents/HDU_Phoenix/general/Inc -I/home/ken/Documents/HDU_Phoenix/utilities/Inc -isystem /usr/local/opencv-4.0.1/include/opencv4 -isystem /usr/local/opencv-4.0.1/include 
 
