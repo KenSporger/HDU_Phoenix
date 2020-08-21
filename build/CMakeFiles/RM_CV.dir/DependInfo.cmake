@@ -4,14 +4,15 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ken/Documents/HDU_Phoenix/armor/Src/ArmorDector.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/armor/Src/ArmorDector.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/camera/Src/camera.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/camera/Src/camera.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/camera/Src/camera_wrapper.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/camera/Src/camera_wrapper.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/main/Src/ImgProdCons.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/main/Src/ImgProdCons.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/main/Src/img_buffer.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/main/Src/img_buffer.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/serials/Src/serial.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/serials/Src/serial.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/test.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/test.cpp.o"
-  "/home/ken/Documents/HDU_Phoenix/utilities/Src/opencv_extend.cpp" "/home/ken/Documents/HDU_Phoenix/build/CMakeFiles/RM_CV.dir/utilities/Src/opencv_extend.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/armor/Src/ArmorDector.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/armor/Src/ArmorDector.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/buff/Src/Buff.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/buff/Src/Buff.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/camera/Src/camera.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/camera/Src/camera.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/camera/Src/camera_wrapper.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/camera/Src/camera_wrapper.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/main/Src/ImgProdCons.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/main/Src/ImgProdCons.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/main/Src/img_buffer.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/main/Src/img_buffer.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/serials/Src/serial.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/serials/Src/serial.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/test.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/test.cpp.o"
+  "/home/ken/Documents/HDU_Phoenix.bk/utilities/Src/opencv_extend.cpp" "/home/ken/Documents/HDU_Phoenix.bk/build/CMakeFiles/RM_CV.dir/utilities/Src/opencv_extend.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

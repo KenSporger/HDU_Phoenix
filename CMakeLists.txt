@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+SET(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(RM_CV)
@@ -41,7 +42,9 @@ add_executable(RM_CV test.cpp armor/Src/ArmorDector.cpp
                             main/Src/ImgProdCons.cpp
                             serials/Src/serial.cpp
                             utilities/Src/opencv_extend.cpp
-                            camera/Src/camera.cpp)
+                            camera/Src/camera.cpp
+                            buff/Src/Buff.cpp
+                            )
 
 #链接
 target_link_libraries(RM_CV ${LIB_DIRS}   libGCBase_gcc421_v3_0.so

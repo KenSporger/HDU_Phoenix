@@ -18,14 +18,18 @@
 #include "opencv_extend.h"
 #include "serial.h"
 #include "log.h"
+#include "Buff.h"
 
 #define IMAGE_CENTER_X 327
 #define IMAGE_CENTER_Y 230
 #define FOCUS_PIXAL 1269
 #define PI (3.14159265459)
+// 0 : armor 
+// 1 : buff
+#define DETECT_MODE 1
 
 cv::Mat img = cv::Mat(480, 640, CV_8UC3, (0, 0, 0));
-cv::VideoCapture video("../video/armorblue.mp4");
+cv::VideoCapture video("../video/wind.mp4");
 ArmorDetector Arm;
 Serial serial;
 
@@ -77,6 +81,7 @@ int main(int argc, char const *argv[])
     // }
 
     DLOG_INFO << "arm begin";
+    Detect detect;
 
     while (1)
     {
@@ -92,33 +97,41 @@ int main(int argc, char const *argv[])
             LOG_ERROR << "size error";
             continue;
         }
-        cv::imshow("src1", img);
 
-        Arm.loadImg(img);
-        Arm.setEnemyColor(BLUE);
-        int find_flag = Arm.detect();
-
-        if (find_flag != 0)
+        if (DETECT_MODE == 0)
         {
-            std::vector<cv::Point2f> Points = Arm.getArmorVertex();
-            cv::Point aimPoint;
-            aimPoint.x = aimPoint.y = 0;
+            Arm.loadImg(img);
+            Arm.setEnemyColor(BLUE);
+            int find_flag = Arm.detect();
 
-            for (const auto &point : Points)
+            if (find_flag != 0)
             {
-                aimPoint.x += point.x;
-                aimPoint.y += point.y;
+                std::vector<cv::Point2f> Points = Arm.getArmorVertex();
+                cv::Point aimPoint;
+                aimPoint.x = aimPoint.y = 0;
+
+                for (const auto &point : Points)
+                {
+                    aimPoint.x += point.x;
+                    aimPoint.y += point.y;
+                }
+                aimPoint.x = aimPoint.x / 4;
+                aimPoint.y = aimPoint.y / 4;
+
+                sendBoxPosition(aimPoint);
             }
-            aimPoint.x = aimPoint.x / 4;
-            aimPoint.y = aimPoint.y / 4;
-
-            sendBoxPosition(aimPoint);
+            else
+            {
+                DLOG_INFO << "can't find enemy";
+            }
         }
-        else
+        else if (DETECT_MODE == 1)
         {
-            DLOG_INFO << "can't find enemy";
+            // Detect detect;
+            detect.detect_new(img);
+            waitKey(0);
         }
-
+        cv::imshow("src1", img);
         if (cv::waitKey(10) >= 0)
         {
             break;
