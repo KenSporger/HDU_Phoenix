@@ -24,6 +24,10 @@ using namespace cv;
 
 #define NO_TARGET -1
 #define MAX_NUM 921600
+// 0: buff.mp4
+// 1: wind.mp4
+// 2: other
+#define VIDEO_TYPE 1
 
 const string lenet_model_file = "/home/qianchen/CLionProjects/HDU_buff/lenet/lenet_iter_80000加了负样本.caffemodel";
 const string lenet_txt_file = "/home/qianchen/CLionProjects/HDU_buff/lenet/deploy.prototxt";
@@ -125,7 +129,13 @@ class Detect {
             //bMode = LUV;
             pMode = TANGENT;
             // getArmorCenter
-            element = getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+            #if( VIDEO_TYPE == 0)
+                element = getStructuringElement(cv::MORPH_RECT, cv::Size(6, 6));
+            #elif (VIDEO_TYPE == 1)
+                element = getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+            #elif (VIDEO_TYPE == 2)
+                element = getStructuringElement(cv::MORPH_RECT, cv::Size(6, 6));
+            #endif
             noise_point_area = 200;//200
             flabellum_area_min = 2000;// standard:7000
             flabellum_whrio_min = 1.5;
@@ -151,7 +161,13 @@ private:
     vector<Point2f> fan_armorCenters; // 用来拟合椭圆的装甲板点集
     Mat affineM;
     // init
-    int mode= BLUE_ANCLOCK;
+    #if( VIDEO_TYPE == 0)
+    int mode= RED_CLOCK;
+    #elif (VIDEO_TYPE == 1)
+    int mode= BLUE_CLOCK;
+    #elif (VIDEO_TYPE == 2)
+    int mode= RED_CLOCK;
+    #endif
     Mat debug_src;
     armorData lostData;
     uint frame_cnt = 0;

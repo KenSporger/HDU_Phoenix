@@ -91,7 +91,7 @@ bool Detect::setBinary(cv::Mat src, cv::Mat &binary, int bMode) {
         // 灰度阈值二值
         cvtColor(src, gray, cv::COLOR_BGR2GRAY);
         threshold(gray, gray_binary, 50, 255, cv::THRESH_BINARY);
-        //imshow("grayBinary", gray_binary);
+        imshow("grayBinary", gray_binary);
 
         // 红蓝通道相减
         std::vector<cv::Mat> splited;
@@ -280,7 +280,7 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
         return false;
     dilate(binary, binary, param.element);// 膨胀程度
    // if (sParam.debug)
-    // imshow("binary", binary);
+    imshow("binary", binary);
 
     /******************************* 反转二值图 *************************************/
 
@@ -540,18 +540,42 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
     //static float radius_sum;
     //static int radius_num;
     float radius_temp=0.0;
+
+#if (VIDEO_TYPE == 0)
+    if (fan_armorCenters.size() < 204)
+    {
+        circleLeastFit(fan_armorCenters, data.R_center, radius_temp);
+    }
+    else if (fan_armorCenters.size() >= 204)
+    {
+        Point2f temp(data.R_center);
+        data.R_center.x = temp.x * affineM.at<double>(0, 0) + temp.y * affineM.at<double>(0, 1) + affineM.at<double>(0, 2);
+        data.R_center.y = temp.x * affineM.at<double>(1, 0) + temp.y * affineM.at<double>(1, 1) + affineM.at<double>(1, 2);     
+    }
+#elif (VIDEO_TYPE == 1)
     if (fan_armorCenters.size() < 60)
     {
         circleLeastFit(fan_armorCenters, data.R_center, radius_temp);
     }
     else if (fan_armorCenters.size() >= 60)
     {
-        data.R_center.x = data.R_center.x * affineM.at<double>(0, 0) + data.R_center.x * affineM.at<double>(0, 1) + affineM.at<double>(0, 2);
-        data.R_center.y = data.R_center.x * affineM.at<double>(1, 0) + data.R_center.y * affineM.at<double>(1, 1) + affineM.at<double>(1, 2);     
+        Point2f temp(data.R_center);
+        data.R_center.x = temp.x * affineM.at<double>(0, 0) + temp.y * affineM.at<double>(0, 1) + affineM.at<double>(0, 2);
+        data.R_center.y = temp.x * affineM.at<double>(1, 0) + temp.y * affineM.at<double>(1, 1) + affineM.at<double>(1, 2);     
     }
+#elif (VIDEO_TYPE == 2)
+    if (fan_armorCenters.size() < 60)
+    {
+        circleLeastFit(fan_armorCenters, data.R_center, radius_temp);
+    }
+    else if (fan_armorCenters.size() >= 60)
+    {
+        Point2f temp(data.R_center);
+        data.R_center.x = temp.x * affineM.at<double>(0, 0) + temp.y * affineM.at<double>(0, 1) + affineM.at<double>(0, 2);
+        data.R_center.y = temp.x * affineM.at<double>(1, 0) + temp.y * affineM.at<double>(1, 1) + affineM.at<double>(1, 2);     
+    }
+#endif
     cout << "fan_armorCenters.size(): " << fan_armorCenters.size()<<endl;
-    
-    
 
     if(radius_temp>0.0)
     {

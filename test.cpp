@@ -29,7 +29,7 @@
 #define DETECT_MODE 1
 
 cv::Mat img = cv::Mat(480, 640, CV_8UC3, (0, 0, 0));
-cv::VideoCapture video("../video/wind.mp4");
+cv::VideoCapture video;
 ArmorDetector Arm;
 Serial serial;
 
@@ -73,6 +73,10 @@ bool sendBoxPosition(cv::Point point)
 
 int main(int argc, char const *argv[])
 {
+    if(VIDEO_TYPE == 0)
+        video.open("../video/buff.mp4");
+    else if (VIDEO_TYPE == 1) 
+        video.open("../video/wind.mp4");
     // bool err = serial.InitPort();
     GLogWrapper glog(argv[0]);
     // while (err)
@@ -84,6 +88,8 @@ int main(int argc, char const *argv[])
     Detect detect;
     Mat dst;
     int cnt = 0;
+    double s1 = 0;
+    double s2 = 0;
     while (1)
     {
         video >> img;
@@ -128,26 +134,30 @@ int main(int argc, char const *argv[])
         }
         else if (DETECT_MODE == 1)
         {
-            img.copyTo(dst);
-            if (++cnt > 100)
+                
+            if (VIDEO_TYPE == 0 && cnt >= 300 && cnt % 50 ==0)
             {
-                Mat affineM(2, 3, CV_64FC1, Scalar(0));
-                affineM.at<double>(0, 0) = 1;
-                affineM.at<double>(0, 0) = 0;
-                affineM.at<double>(0, 0) = rand()%50;
-                affineM.at<double>(0, 0) = 0;
-                affineM.at<double>(0, 0) = 1;
-                affineM.at<double>(0, 0) = rand()%50;
-                warpAffine(img, dst, affineM, img.size());
+                s1 = rand()%50;
+                s2 = rand()%50;
             }
-            
+            else if (VIDEO_TYPE == 1 && cnt >= 100 && cnt % 50 ==0)
+            {
+                s1 = rand()%50;
+                s2 = rand()%50;
+            }
+            Mat affineM(2, 3, CV_64FC1, Scalar(0));
+            affineM.at<double>(0, 0) = 1;
+            affineM.at<double>(0, 1) = 0;
+            affineM.at<double>(0, 2) = s1;
+            affineM.at<double>(1, 0) = 0;
+            affineM.at<double>(1, 1) = 1;
+            affineM.at<double>(1, 2) = s2;
+            warpAffine(img, dst, affineM, img.size());
+            cnt++;
             detect.detect_new(dst);
-            waitKey(0);
         }
         cv::imshow("src1", dst);
-        if (cv::waitKey(10) >= 0)
-        {
-            break;
-        }
+        waitKey(0);
+
     }
 }
