@@ -224,6 +224,44 @@ bool Detect::setBinary(cv::Mat src, cv::Mat &binary, int bMode) {
 }
 
 
+void Detect::armorCornerSort(armorData &data)
+{
+    Point2f center1, center2;
+    double dist1, dist2;
+    if (data.wLarger)
+    {
+        center1 = (data.ArmorCorners[0]+data.ArmorCorners[3])/2;
+        center2 = (data.ArmorCorners[1]+data.ArmorCorners[2])/2;
+        dist1 = distance(center1, data.barycenter);
+        dist2 = distance(center2, data.barycenter);
+        if (dist1 > dist2)
+        {
+            swap(data.ArmorCorners[0], data.ArmorCorners[2]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[3]);
+        }
+    }
+    else 
+    {
+        center1 = (data.ArmorCorners[0]+data.ArmorCorners[1])/2;
+        center2 = (data.ArmorCorners[2]+data.ArmorCorners[3])/2;
+        dist1 = distance(center1, data.barycenter);
+        dist2 = distance(center2, data.barycenter);
+        if (dist1 > dist2)
+        {
+            swap(data.ArmorCorners[0], data.ArmorCorners[3]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[2]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[3]);
+        }
+        else
+        {
+            swap(data.ArmorCorners[0], data.ArmorCorners[1]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[2]);
+            swap(data.ArmorCorners[2], data.ArmorCorners[3]);
+        }
+    }
+}
+
+
 /// 新版本，思想是希望把已经击打过的装甲板中心也用在椭圆拟合上
 /// \brief 检测装甲板_mode2
 /// \param src 原图
@@ -276,7 +314,6 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
      * */
 
     Point2f center;
-    Point2f predictAimPoint;
     int hammerToFall;//用于统计本帧中是否存在锤子
     if (classiMode==mySonNum) {
         for (size_t i = 0; i < armorContours_size; ++i)// 遍历每个轮廓
@@ -297,36 +334,62 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
                 if ((son != -1) && (armorContours[son].size() > 2))//子轮廓ID不为-1，并且该轮廓点集数目必须大于2(才可以获得外接矩形)
                 {
                     RotatedRect son_rect = minAreaRect(armorContours[son]);//锤子中子轮廓（装甲板）的外接矩形
+                    RotatedRect dad_rect = minAreaRect(armorContours[i]);//锤子中子轮廓（装甲板）的外接矩形
                     if (son_rect.center == Point2f(0, 0)) return false;
+                    if (son_rect.size.area() < 50) return false;
                     Point2f p[4];//装甲板四个点
                     son_rect.points(p);
                     for (int j = 0; j < 4; j++)//画出装甲板矩形
                     {
                         line(src, p[j], p[(j + 1) % 4], Scalar(0, 0, 255), 2, 8);  //绘制最小外接矩形每条边
                     }
-                    if(data.armorCenter.x != 0 && data.armorCenter.y != 0)
-                    {
-                        data.preArmorCenter  =  data.armorCenter;
-                    }
+                    // if(data.armorCenter.x != 0 && data.armorCenter.y != 0)
+                    // {
+                    //     data.preArmorCenter  =  data.armorCenter;
+                    // }
+                    
                     data.armorCenter = son_rect.center + offset;//在原图中的坐标
-                    data.preArmorPoints[0] = data.ArmorPoints[0]+ offset;
-                    data.preArmorPoints[1] = data.ArmorPoints[1]+ offset;
-                    data.preArmorPoints[2] = data.ArmorPoints[2]+ offset;
-                    data.preArmorPoints[3] = data.ArmorPoints[3]+ offset;
-                    son_rect.points(data.ArmorPoints);
-                    affineM = getAffineTransform(data.preArmorPoints, data.ArmorPoints);
-                    Point2f newP;
-                    newP.x = data.preArmorCenter.x + affineM.at<double>(0, 2);
-                    newP.y = data.preArmorCenter.y + affineM.at<double>(1, 2);
-                    cout << "newP " <<  newP << endl;
-                    cout << "center " <<  data.armorCenter << endl;
+                    data.wLarger = son_rect.size.width > son_rect.size.height;
+                    data.barycenter = dad_rect.center + offset;
 
-                     if(abs(data.armorCenter .x - data.preArmorCenter.x ) > 10 && abs(data.armorCenter.y - data.preArmorCenter.y)> 10)
+                    son_rect.points(data.ArmorCorners);
+                    for (int i = 0; i < 4; i++)
                     {
-                        data.preArmorCenter = data.armorCenter;
+                        data.ArmorCorners[i] += offset;
                     }
+                    if (data.preArmorCenter.x != 0 && data.preArmorCenter.y != 0)
+                    {
+                        armorCornerSort(data);
+                        affineM = getAffineTransform(data.preArmorCorners, data.ArmorCorners);
+                        
+                        // show armor center by warpAffine
+                        Point2f newP;
+                        newP.x = data.preArmorCenter.x * affineM.at<double>(0, 0) + data.preArmorCenter.y * affineM.at<double>(0, 1) + affineM.at<double>(0, 2);
+                        newP.y = data.preArmorCenter.x * affineM.at<double>(1, 0) + data.preArmorCenter.y * affineM.at<double>(1, 1) + affineM.at<double>(1, 2);
+                        
+                        cout << affineM.at<double>(0, 0) << ", " << affineM.at<double>(0, 1) << "," << affineM.at<double>(0, 2) << endl;
+                        cout << affineM.at<double>(1, 0) << ", " << affineM.at<double>(1, 1) << "," << affineM.at<double>(1, 2) << endl;
+                        circle(src, data.barycenter, 3, Scalar(0, 255, 255), 2);
+                        circle(src, newP, 3, Scalar(0, 0, 255), 2);
+                        circle(src, data.ArmorCorners[0], 2, Scalar(0, 255, 0), 2);
+                        circle(src, data.ArmorCorners[1], 4, Scalar(0, 255, 0), 2);
+                        circle(src, data.ArmorCorners[2], 6, Scalar(0, 255, 0), 2);
+                        circle(src, data.ArmorCorners[3], 8, Scalar(0, 255, 0), 2);
+
+                        data.preArmorCorners[0] = data.ArmorCorners[0];
+                        data.preArmorCorners[1] = data.ArmorCorners[1];
+                        data.preArmorCorners[2] = data.ArmorCorners[2];
+                        data.preArmorCorners[3] = data.ArmorCorners[3];                        
+                    }
+                    //update prev center
+                    data.preArmorCenter  =  data.armorCenter;
+                    
+                    // if(abs(data.armorCenter .x - data.preArmorCenter.x ) > 10 && abs(data.armorCenter.y - data.preArmorCenter.y)> 10)
+                    // {
+                    //     data.preArmorCenter = data.armorCenter;
+                    // }
                     data.runTime = _tTime.getElapsedTimeInMilliSec();
-                    if(preArmorCentor(data ,0.7,BIG_BUFF) == false)
+                    if(preArmorCentor(data ,0.7,SMALL_BUFF) == false)
                     {
                         return false;
                     }
@@ -337,31 +400,6 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
 
                     std::cout << "预测   " << data.predictCenter<<endl;
                 }
-
-                //将找到的点放入点集中为后面拟合椭圆做准备
-                if (data.preArmorCenter != Point2f(0, 0)) {
-                    if (fan_armorCenters_offset.size() < 200) {
-                        fan_armorCenters_offset.push_back(data.preArmorCenter - data.armorCenter);
-                    } else if (fan_armorCenters_offset.size() >= 200) {
-                        if (center_index == 200)
-                        {
-                            center_index = 0;
-                            radius_sum=0;
-                            radius_num=0;
-                        }
-                        fan_armorCenters_offset[center_index] = data.preArmorCenter - data.armorCenter;
-                        center_index++;
-                        // cout<<"center_index:"<<center_index<<endl;
-                    }
-                }
-                else
-                {
-                    //圆拟合数据重置
-                    fan_armorCenters_offset.clear();
-                    radius_sum=0;
-                    radius_num=0;
-                }
-                // cout<<"size:"<<fan_armorCenters.size()<<endl;
 
                 // if (data.armorCenter != Point2f(0, 0)) {
                 //     if (fan_armorCenters.size() < 200) {
@@ -386,100 +424,103 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
                 //     radius_sum=0;
                 //     radius_num=0;
                 // }
-                //cout<<"size:"<<fan_armorCenters.size()<<endl;
-
-            } else if (findCount[i] > 2)//子轮廓>2，有可能是六边形
-            {
-                /*//用来画六边形的轮廓*/
-                drawContours(src,armorContours,i,Scalar(0,255,0));
-                RotatedRect FatherRect = minAreaRect(armorContours[i]);//有可能是六边形的轮廓
-                if (FatherRect.size.width * FatherRect.size.height < 5000) continue;//六边形外接矩形面积不能太小
-
-
-                vector<int> sons;
-                int final_son = armorHierarchy[i][2];
-                //把所有子轮廓找到，然后把其下标放入sons
-                while (final_son != -1) {
-                    //画出所有子轮廓
-                    //cout<<"final_son:"<<final_son<<endl;
-                    drawContours(src,armorContours,final_son,Scalar(0,255,255));
-
-                    //子轮廓都放入sons中
-                    sons.push_back(final_son);
-                    final_son = armorHierarchy[sons.back()][0];
-                }
-                //for(int it =0;it<sons.size();it ++) cout<<sons[it]<<" ";  //子轮廓序号
-
-                vector<RotatedRect> SonsRect;
-                for (int s = 0; s < sons.size(); s++) {
-                    RotatedRect SonRect = minAreaRect(armorContours[sons[s]]);
-                    SonsRect.push_back(SonRect);
+                if (data.armorCenter != Point2f(0, 0)) {
+                    fan_armorCenters.push_back(data.armorCenter);
                 }
 
-                //调试：画出六边形外接矩形
-                Point2f p[4];
-                FatherRect.points(p);
-                for (int j = 0; j < 4; j++) {
-                    line(src, p[j], p[(j + 1) % 4], Scalar(0, 0, 255), 2, 8);  //绘制最小外接矩形每条边
-                }
+            } 
+            // else if (findCount[i] > 2)//子轮廓>2，有可能是六边形
+            // {
+            //     /*//用来画六边形的轮廓*/
+            //     drawContours(src,armorContours,i,Scalar(0,255,0));
+            //     RotatedRect FatherRect = minAreaRect(armorContours[i]);//有可能是六边形的轮廓
+            //     if (FatherRect.size.width * FatherRect.size.height < 5000) continue;//六边形外接矩形面积不能太小
+
+
+            //     vector<int> sons;
+            //     int final_son = armorHierarchy[i][2];
+            //     //把所有子轮廓找到，然后把其下标放入sons
+            //     while (final_son != -1) {
+            //         //画出所有子轮廓
+            //         //cout<<"final_son:"<<final_son<<endl;
+            //         drawContours(src,armorContours,final_son,Scalar(0,255,255));
+
+            //         //子轮廓都放入sons中
+            //         sons.push_back(final_son);
+            //         final_son = armorHierarchy[sons.back()][0];
+            //     }
+            //     //for(int it =0;it<sons.size();it ++) cout<<sons[it]<<" ";  //子轮廓序号
+
+            //     vector<RotatedRect> SonsRect;
+            //     for (int s = 0; s < sons.size(); s++) {
+            //         RotatedRect SonRect = minAreaRect(armorContours[sons[s]]);
+            //         SonsRect.push_back(SonRect);
+            //     }
+
+            //     //调试：画出六边形外接矩形
+            //     Point2f p[4];
+            //     FatherRect.points(p);
+            //     for (int j = 0; j < 4; j++) {
+            //         line(src, p[j], p[(j + 1) % 4], Scalar(0, 0, 255), 2, 8);  //绘制最小外接矩形每条边
+            //     }
                 
 
-                //调试
-                // cout << "父亲的角度：" << "(" << FatherRect.angle << ")" << endl;
-                // cout << "差值：" << endl;//认为父轮廓的角度应该是相近的
-                int qualifiedSubAngle = 0;//如果有子轮廓和父轮廓角度的差值小于5就++
-                for (int s = 0; s < sons.size(); s++) {
-                    //画出子轮廓
-                    Point2f p2[4];
-                    SonsRect[s].points(p2);
-                    for (int j = 0; j < 4; j++) {
-                        line(src, p2[j], p2[(j + 1) % 4], Scalar(0, 255, 255), 2, 8);  //绘制最小外接矩形每条边
-                    }
+            //     //调试
+            //     // cout << "父亲的角度：" << "(" << FatherRect.angle << ")" << endl;
+            //     // cout << "差值：" << endl;//认为父轮廓的角度应该是相近的
+            //     int qualifiedSubAngle = 0;//如果有子轮廓和父轮廓角度的差值小于5就++
+            //     for (int s = 0; s < sons.size(); s++) {
+            //         //画出子轮廓
+            //         Point2f p2[4];
+            //         SonsRect[s].points(p2);
+            //         for (int j = 0; j < 4; j++) {
+            //             line(src, p2[j], p2[(j + 1) % 4], Scalar(0, 255, 255), 2, 8);  //绘制最小外接矩形每条边
+            //         }
 
-                    // 角度差统计
-                    // if (abs(SonsRect[s].angle - FatherRect.angle) < 5.0) qualifiedSubAngle++;
-                    // cout << "(" << SonsRect[s].angle << "-" << FatherRect.angle << ")"
-                    //      << abs(SonsRect[s].angle - FatherRect.angle) << endl;
-                }
-                //
-                if (qualifiedSubAngle < 2) continue;
+            //         // 角度差统计
+            //         // if (abs(SonsRect[s].angle - FatherRect.angle) < 5.0) qualifiedSubAngle++;
+            //         // cout << "(" << SonsRect[s].angle << "-" << FatherRect.angle << ")"
+            //         //      << abs(SonsRect[s].angle - FatherRect.angle) << endl;
+            //     }
+            //     //
+            //     if (qualifiedSubAngle < 2) continue;
 
-                vector<float> Sons_whratio;//子轮廓的长宽比
-                for (int j = 0; j < SonsRect.size(); j++) {
-                    float a = SonsRect[j].size.height;
-                    float b = SonsRect[j].size.width;
-                    if (a < b) swap(a, b);
-                    Sons_whratio.push_back(a / b);
-                }
+            //     vector<float> Sons_whratio;//子轮廓的长宽比
+            //     for (int j = 0; j < SonsRect.size(); j++) {
+            //         float a = SonsRect[j].size.height;
+            //         float b = SonsRect[j].size.width;
+            //         if (a < b) swap(a, b);
+            //         Sons_whratio.push_back(a / b);
+            //     }
 
-                /*//调试：写出每个子轮廓的长宽比
-                cout<<"ratios:"<<endl;
-                for(auto ratio : Sons_whratio)
-                    cout<<ratio<<" ";*/
-
-
-                //利用子轮廓的长宽比（过于简单）来区分装甲板和其他两个扁长的矩形
-                // for (int j = 0; j < Sons_whratio.size(); j++) {
-                //     if ((Sons_whratio[j] > 1) && (Sons_whratio[j] < 2.5)&&((SonsRect[j].center+offset)!=Point2f(0, 0))) {
-                //         if (fan_armorCenters.size() < 200) {
-                //             fan_armorCenters.push_back(SonsRect[j].center + offset);
-                //         } else if (fan_armorCenters.size() >= 200) {
-                //             if (center_index == 200)
-                //             {
-                //                 center_index = 0;
-                //                 radius_sum=0;
-                //                 radius_num=0;
-                //             }
-                //             fan_armorCenters[center_index] = SonsRect[j].center + offset;
-                //             center_index++;
-                //         }
-                //     }
-                // }
+            //     /*//调试：写出每个子轮廓的长宽比
+            //     cout<<"ratios:"<<endl;
+            //     for(auto ratio : Sons_whratio)
+            //         cout<<ratio<<" ";*/
 
 
-            } else {
-                continue;
-            }
+            //     //利用子轮廓的长宽比（过于简单）来区分装甲板和其他两个扁长的矩形
+            //     // for (int j = 0; j < Sons_whratio.size(); j++) {
+            //     //     if ((Sons_whratio[j] > 1) && (Sons_whratio[j] < 2.5)&&((SonsRect[j].center+offset)!=Point2f(0, 0))) {
+            //     //         if (fan_armorCenters.size() < 200) {
+            //     //             fan_armorCenters.push_back(SonsRect[j].center + offset);
+            //     //         } else if (fan_armorCenters.size() >= 200) {
+            //     //             if (center_index == 200)
+            //     //             {
+            //     //                 center_index = 0;
+            //     //                 radius_sum=0;
+            //     //                 radius_num=0;
+            //     //             }
+            //     //             fan_armorCenters[center_index] = SonsRect[j].center + offset;
+            //     //             center_index++;
+            //     //         }
+            //     //     }
+            //     // }
+
+
+            // } else {
+            //     continue;
+            // }
 
         }
     }
@@ -499,19 +540,16 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
     //static float radius_sum;
     //static int radius_num;
     float radius_temp=0.0;
-    Point2f headPoint(data.armorCenter);
-    if (fan_armorCenters_offset.size() > 5)
+    if (fan_armorCenters.size() < 60)
     {
-        fan_armorCenters.clear();
-        fan_armorCenters.push_back(data.armorCenter);
-        for (int i = fan_armorCenters_offset.size()-1; i >= 0; i--)
-        {
-            headPoint += fan_armorCenters_offset[i];
-            fan_armorCenters.push_back(headPoint);
-            circle(src, headPoint, 2, Scalar(255, 255, 255), 2);
-        }
         circleLeastFit(fan_armorCenters, data.R_center, radius_temp);
     }
+    else if (fan_armorCenters.size() >= 60)
+    {
+        data.R_center.x = data.R_center.x * affineM.at<double>(0, 0) + data.R_center.x * affineM.at<double>(0, 1) + affineM.at<double>(0, 2);
+        data.R_center.y = data.R_center.x * affineM.at<double>(1, 0) + data.R_center.y * affineM.at<double>(1, 1) + affineM.at<double>(1, 2);     
+    }
+    cout << "fan_armorCenters.size(): " << fan_armorCenters.size()<<endl;
     
     
 
@@ -524,19 +562,19 @@ bool Detect::getArmorCenter_new( cv::Mat &src, const int bMode,armorData &data ,
     float radius=radius_sum/radius_num;
     data .radius =radius;
     if (sParam.debug) {
-        circle(src, data.armorCenter, 5, Scalar(255, 255, 255), 2);
+        // circle(src, data.armorCenter, 5, Scalar(255, 255, 255), 2);
         if(data.preArmorCenter.x != 0 && data.preArmorCenter.y !=0)
         {
-            circle(src , data.preArmorCenter , 5, Scalar(255,0,0),2);
+            // circle(src , data.preArmorCenter , 5, Scalar(255,0,0),2);
         }
        // circle(src, data.preArmorCenter, 5, Scalar(255, 0, 0), 2);
        if(data.predictCenter .x != 0 && data.predictCenter.y != 0)
        {
-           circle(src, data.predictCenter, 5, Scalar(255, 255, 0), 2);
+        //    circle(src, data.predictCenter, 5, Scalar(255, 255, 0), 2);
        }
         if(radius>0)
         {
-            circle(src, data.R_center, 5, Scalar(255, 255, 255), 2);
+            circle(src, data.R_center, 3, Scalar(255, 255, 255), 2);
             circle(src, data.R_center, radius, Scalar(20, 100, 100), 2);
         }
    }

@@ -63,8 +63,10 @@ class Detect {
         Point2f R_center;
         Point2f preArmorCenter;
         Point2f predictCenter;
-        Point2f ArmorPoints[4];
-        Point2f preArmorPoints[4];
+        Point2f ArmorCorners[4];
+        Point2f preArmorCorners[4];
+        Point2f  barycenter;
+        bool wLarger;
         double angularVelocity;
         float runTime;
         float radius;
@@ -77,6 +79,8 @@ class Detect {
             R_center = cv::Point2f(0, 0);
             preArmorCenter = cv::Point2f(0,0);
             predictCenter = cv::Point2f(0,0);
+            barycenter = cv::Point2f(0,0);
+            wLarger = false;
             angle = 0;
             radius =0;
             angularVelocity=0;
@@ -144,7 +148,6 @@ private:
     // param
     DectParam param;
     switchParam sParam;
-    vector<Point2f> fan_armorCenters_offset;
     vector<Point2f> fan_armorCenters; // 用来拟合椭圆的装甲板点集
     Mat affineM;
     // init
@@ -165,6 +168,7 @@ private:
     double countRotationAngle(Point2f nowCenter , Point2f preCenter , double radius , Point2f  roundCenter);
     bool makeRectSafe(const cv::Rect rect, const cv::Size size);
     bool circleLeastFit(std::vector<cv::Point2f> &points, cv::Point2f &R_center,float &radius);
+    void armorCornerSort(armorData &data);
 public:
     Detect(){}
     bool setBinary(cv::Mat src, cv::Mat &binary, int bMode);

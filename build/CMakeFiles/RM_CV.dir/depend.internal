@@ -5,7 +5,7 @@ CMakeFiles/RM_CV.dir/armor/Src/ArmorDector.cpp.o
  ../armor/Inc/ArmorDector.h
  ../utilities/Inc/general.h
  ../utilities/Inc/opencv_extend.h
- /home/ken/Documents/HDU_Phoenix.bk/armor/Src/ArmorDector.cpp
+ /home/ken/Documents/HDU_Phoenix/armor/Src/ArmorDector.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp
@@ -126,7 +126,7 @@ CMakeFiles/RM_CV.dir/armor/Src/ArmorDector.cpp.o
 CMakeFiles/RM_CV.dir/buff/Src/Buff.cpp.o
  ../buff/Inc/Buff.h
  ../buff/Inc/Timestamp.h
- /home/ken/Documents/HDU_Phoenix.bk/buff/Src/Buff.cpp
+ /home/ken/Documents/HDU_Phoenix/buff/Src/Buff.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
@@ -257,7 +257,7 @@ CMakeFiles/RM_CV.dir/camera/Src/camera.cpp.o
  ../camera/cam_inc/MvErrorDefine.h
  ../camera/cam_inc/PixelType.h
  ../utilities/Inc/log.h
- /home/ken/Documents/HDU_Phoenix.bk/camera/Src/camera.cpp
+ /home/ken/Documents/HDU_Phoenix/camera/Src/camera.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp
@@ -383,7 +383,7 @@ CMakeFiles/RM_CV.dir/camera/Src/camera_wrapper.cpp.o
  ../camera/cam_inc/MvErrorDefine.h
  ../camera/cam_inc/PixelType.h
  ../utilities/Inc/log.h
- /home/ken/Documents/HDU_Phoenix.bk/camera/Src/camera_wrapper.cpp
+ /home/ken/Documents/HDU_Phoenix/camera/Src/camera_wrapper.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp
@@ -515,7 +515,7 @@ CMakeFiles/RM_CV.dir/main/Src/ImgProdCons.cpp.o
  ../utilities/Inc/general.h
  ../utilities/Inc/log.h
  ../utilities/Inc/opencv_extend.h
- /home/ken/Documents/HDU_Phoenix.bk/main/Src/ImgProdCons.cpp
+ /home/ken/Documents/HDU_Phoenix/main/Src/ImgProdCons.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp
@@ -636,7 +636,7 @@ CMakeFiles/RM_CV.dir/main/Src/ImgProdCons.cpp.o
 CMakeFiles/RM_CV.dir/main/Src/img_buffer.cpp.o
  ../main/Inc/img_buffer.h
  ../utilities/Inc/log.h
- /home/ken/Documents/HDU_Phoenix.bk/main/Src/img_buffer.cpp
+ /home/ken/Documents/HDU_Phoenix/main/Src/img_buffer.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp
@@ -759,7 +759,7 @@ CMakeFiles/RM_CV.dir/serials/Src/serial.cpp.o
  ../armor/Inc/ArmorDector.h
  ../serials/Inc/serial.h
  ../utilities/Inc/general.h
- /home/ken/Documents/HDU_Phoenix.bk/serials/Src/serial.cpp
+ /home/ken/Documents/HDU_Phoenix/serials/Src/serial.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp
@@ -890,7 +890,7 @@ CMakeFiles/RM_CV.dir/test.cpp.o
  ../utilities/Inc/general.h
  ../utilities/Inc/log.h
  ../utilities/Inc/opencv_extend.h
- /home/ken/Documents/HDU_Phoenix.bk/test.cpp
+ /home/ken/Documents/HDU_Phoenix/test.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
@@ -1015,7 +1015,7 @@ CMakeFiles/RM_CV.dir/test.cpp.o
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/videostab/wobble_suppression.hpp
 CMakeFiles/RM_CV.dir/utilities/Src/opencv_extend.cpp.o
  ../utilities/Inc/opencv_extend.h
- /home/ken/Documents/HDU_Phoenix.bk/utilities/Src/opencv_extend.cpp
+ /home/ken/Documents/HDU_Phoenix/utilities/Src/opencv_extend.cpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/calib3d.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core.hpp
  /usr/local/opencv-4.0.1/include/opencv4/opencv2/core/affine.hpp

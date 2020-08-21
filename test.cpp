@@ -82,7 +82,8 @@ int main(int argc, char const *argv[])
 
     DLOG_INFO << "arm begin";
     Detect detect;
-
+    Mat dst;
+    int cnt = 0;
     while (1)
     {
         video >> img;
@@ -127,11 +128,23 @@ int main(int argc, char const *argv[])
         }
         else if (DETECT_MODE == 1)
         {
-            // Detect detect;
-            detect.detect_new(img);
+            img.copyTo(dst);
+            if (++cnt > 100)
+            {
+                Mat affineM(2, 3, CV_64FC1, Scalar(0));
+                affineM.at<double>(0, 0) = 1;
+                affineM.at<double>(0, 0) = 0;
+                affineM.at<double>(0, 0) = rand()%50;
+                affineM.at<double>(0, 0) = 0;
+                affineM.at<double>(0, 0) = 1;
+                affineM.at<double>(0, 0) = rand()%50;
+                warpAffine(img, dst, affineM, img.size());
+            }
+            
+            detect.detect_new(dst);
             waitKey(0);
         }
-        cv::imshow("src1", img);
+        cv::imshow("src1", dst);
         if (cv::waitKey(10) >= 0)
         {
             break;
