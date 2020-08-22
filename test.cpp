@@ -18,14 +18,18 @@
 #include "opencv_extend.h"
 #include "serial.h"
 #include "log.h"
+#include "Buff.h"
 
 #define IMAGE_CENTER_X 327
 #define IMAGE_CENTER_Y 230
 #define FOCUS_PIXAL 1269
 #define PI (3.14159265459)
+// 0 : armor 
+// 1 : buff
+#define DETECT_MODE 1
 
 cv::Mat img = cv::Mat(480, 640, CV_8UC3, (0, 0, 0));
-cv::VideoCapture video("../video/armorblue.mp4");
+cv::VideoCapture video;
 ArmorDetector Arm;
 Serial serial;
 
@@ -69,6 +73,10 @@ bool sendBoxPosition(cv::Point point)
 
 int main(int argc, char const *argv[])
 {
+    if(VIDEO_TYPE == 0)
+        video.open("../video/buff.mp4");
+    else if (VIDEO_TYPE == 1) 
+        video.open("../video/wind.mp4");
     // bool err = serial.InitPort();
     GLogWrapper glog(argv[0]);
     // while (err)
@@ -77,7 +85,11 @@ int main(int argc, char const *argv[])
     // }
 
     DLOG_INFO << "arm begin";
-
+    Detect detect;
+    Mat dst;
+    int cnt = 0;
+    double s1 = 0;
+    double s2 = 0;
     while (1)
     {
         video >> img;
@@ -92,36 +104,60 @@ int main(int argc, char const *argv[])
             LOG_ERROR << "size error";
             continue;
         }
-        cv::imshow("src1", img);
 
-        Arm.loadImg(img);
-        Arm.setEnemyColor(BLUE);
-        int find_flag = Arm.detect();
-
-        if (find_flag != 0)
+        if (DETECT_MODE == 0)
         {
-            std::vector<cv::Point2f> Points = Arm.getArmorVertex();
-            cv::Point aimPoint;
-            aimPoint.x = aimPoint.y = 0;
+            Arm.loadImg(img);
+            Arm.setEnemyColor(BLUE);
+            int find_flag = Arm.detect();
 
-            for (const auto &point : Points)
+            if (find_flag != 0)
             {
-                aimPoint.x += point.x;
-                aimPoint.y += point.y;
+                std::vector<cv::Point2f> Points = Arm.getArmorVertex();
+                cv::Point aimPoint;
+                aimPoint.x = aimPoint.y = 0;
+
+                for (const auto &point : Points)
+                {
+                    aimPoint.x += point.x;
+                    aimPoint.y += point.y;
+                }
+                aimPoint.x = aimPoint.x / 4;
+                aimPoint.y = aimPoint.y / 4;
+
+                sendBoxPosition(aimPoint);
             }
-            aimPoint.x = aimPoint.x / 4;
-            aimPoint.y = aimPoint.y / 4;
-
-            sendBoxPosition(aimPoint);
+            else
+            {
+                DLOG_INFO << "can't find enemy";
+            }
         }
-        else
+        else if (DETECT_MODE == 1)
         {
-            DLOG_INFO << "can't find enemy";
+                
+            if (VIDEO_TYPE == 0 && cnt >= 300 && cnt % 50 ==0)
+            {
+                s1 = rand()%50;
+                s2 = rand()%50;
+            }
+            else if (VIDEO_TYPE == 1 && cnt >= 100 && cnt % 50 ==0)
+            {
+                s1 = rand()%50;
+                s2 = rand()%50;
+            }
+            Mat affineM(2, 3, CV_64FC1, Scalar(0));
+            affineM.at<double>(0, 0) = 1;
+            affineM.at<double>(0, 1) = 0;
+            affineM.at<double>(0, 2) = s1;
+            affineM.at<double>(1, 0) = 0;
+            affineM.at<double>(1, 1) = 1;
+            affineM.at<double>(1, 2) = s2;
+            warpAffine(img, dst, affineM, img.size());
+            cnt++;
+            detect.detect_new(dst);
         }
+        cv::imshow("src1", dst);
+        waitKey(0);
 
-        if (cv::waitKey(10) >= 0)
-        {
-            break;
-        }
     }
 }
