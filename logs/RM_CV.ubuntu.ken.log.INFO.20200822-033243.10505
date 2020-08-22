@@ -1,0 +1,4 @@
+Log file created at: 2020/08/22 03:32:43
+Running on machine: ubuntu
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20200822 03:32:43.899602 10505 test.cpp:87] arm begin

@@ -223,6 +223,162 @@ bool Detect::setBinary(cv::Mat src, cv::Mat &binary, int bMode) {
 
     return true;
 }
+void Detect::armorCornerSort(armorData &data)
+{
+    Point2f center1, center2;
+    double dist1, dist2;
+    if (data.wLarger)
+    {
+        center1 = (data.ArmorCorners[0]+data.ArmorCorners[3])/2;
+        center2 = (data.ArmorCorners[1]+data.ArmorCorners[2])/2;
+        dist1 = distance(center1, data.barycenter);
+        dist2 = distance(center2, data.barycenter);
+        if (dist1 > dist2)
+        {
+            swap(data.ArmorCorners[0], data.ArmorCorners[2]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[3]);
+        }
+    }
+    else 
+    {
+        center1 = (data.ArmorCorners[0]+data.ArmorCorners[1])/2;
+        center2 = (data.ArmorCorners[2]+data.ArmorCorners[3])/2;
+        dist1 = distance(center1, data.barycenter);
+        dist2 = distance(center2, data.barycenter);
+        if (dist1 > dist2)
+        {
+            swap(data.ArmorCorners[0], data.ArmorCorners[3]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[2]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[3]);
+        }
+        else
+        {
+            swap(data.ArmorCorners[0], data.ArmorCorners[1]);
+            swap(data.ArmorCorners[1], data.ArmorCorners[2]);
+            swap(data.ArmorCorners[2], data.ArmorCorners[3]);
+        }
+    }
+}
+
+
+double Detect::cacuDistanceOfLine(const polarData &l, Point2f p)
+{
+    double res = p.x * l.theta_cos + p.y * l.theta_sin - l.rho;
+    if (res == 0) return 0;
+    if (l.theta_sin < 0)
+    {
+        return res < 0? -res : -res;
+    }
+    else
+    {
+        return res > 0? res : res;
+    }
+
+
+}
+
+void Detect::findSymmetry(vector<Point> contour, polarData &symLine1, polarData &symLine2)
+{
+    double mean_x=0, mean_y=0;
+    double N=0, M=0;
+    
+    for (auto p:contour)
+    {
+        mean_x += p.x;
+        mean_y += p.y;
+    }
+    mean_x /= contour.size();
+    mean_y /= contour.size();
+    
+    double temp1, temp2;
+    for (auto p:contour)
+    {
+        temp1 = (p.x - mean_x);
+        temp2 = (p.y - mean_y);
+        M += temp1 * temp2;
+        N += temp1 * temp1 - temp2 * temp2;
+    }
+    
+    symLine1.theta = atan(2*M/N) / 2;
+    symLine1.theta_cos = cos(symLine1.theta);
+    symLine1.theta_sin = sin(symLine1.theta);
+    symLine1.rho = symLine1.theta_cos * mean_x + symLine1.theta_sin * mean_y;
+    symLine2.theta = symLine1.theta > 0? symLine1.theta - PI/2: symLine1.theta + PI/2;  
+    symLine2.theta_cos = cos(symLine2.theta);
+    symLine2.theta_sin = sin(symLine2.theta);
+    symLine2.rho = symLine2.theta_cos * mean_x + symLine2.theta_sin * mean_y;
+}
+
+bool Detect::ransacIntersection(const vector<polarData> &lines, Point2f &interPoint)
+{
+	int linesAmount = lines.size();    
+	int maxIterCnt = linesAmount / 2;  //最大迭代次数
+	double maxErrorThreshold = 0.5; //最大误差阈值, max distance by cacuDistanceOfLine
+	int consensusCntThreshold = maxIterCnt;
+
+	if (!linesAmount || linesAmount <= 3)
+	{
+		return false;
+	}
+
+	//在点云链表的下标取值范围内产生随机数，目的是可以随机选择一个点云
+	std::default_random_engine rng;
+	std::uniform_int_distribution <int> uniform(0, linesAmount - 1);
+	rng.seed(777);  //seed函数可以接收任意整数作为实参
+	
+	vector<int> selectIndexs;            //随机选择的点云的索引
+	vector<polarData> selectLines;   //随机选择的点云对象
+	vector<int> consensusIndexs;         //满足一致性条件的点云的索引
+
+	Point2f interP(0, 0);
+	double modelMeanError = 0;              //平均误差
+	int bestConsensusCnt = 0;               //满足一致性的点的个数
+	int iter = 0;                           //迭代次数
+
+	double scale;
+
+	//开始迭代计算
+	while (iter < maxIterCnt)
+	{
+		selectIndexs.clear();
+		selectLines.clear();
+		//在原始点云中随机取出2个
+		for (int c = 0; c < 2; ++c)
+		{
+			selectLines.push_back(lines.at(uniform(rng)));
+		}
+
+       scale  = selectLines[0].theta_cos * selectLines[1].theta_sin - selectLines[0].theta_sin * selectLines[1].theta_cos;
+	   interP.x = (-selectLines[0].theta_sin * selectLines[1].rho + selectLines[0].rho * selectLines[1].theta_sin) / scale;
+	   interP.y = (-selectLines[0].rho * selectLines[1].theta_cos + selectLines[0].theta_cos * selectLines[1].rho) / scale;
+
+
+		double meanError = 0;
+		vector<int> tmpConsensusIndexs; //满足一致性条件的点索引集合，这只是临时索引集合，需要随时更新。
+		for (int j = 0; j < linesAmount; ++j)
+		{
+			const polarData& line1 = lines[j];
+			double distance = abs(cacuDistanceOfLine(line1, interP));
+            cout << "d: " << distance << endl;
+			if (distance < maxErrorThreshold)
+			{
+				tmpConsensusIndexs.push_back(j);
+			}
+			meanError += distance;
+		}
+
+		if (tmpConsensusIndexs.size() >= bestConsensusCnt && tmpConsensusIndexs.size() >= consensusCntThreshold)
+		{
+			bestConsensusCnt = consensusIndexs.size();  // 更新一致性索引集合元素个数
+			modelMeanError = meanError / linesAmount;
+			consensusIndexs.clear();
+			consensusIndexs = tmpConsensusIndexs;        // 更新一致性索引集合
+			interPoint = interP;
+		}
+		iter++;
+	}
+	return true;
+}
 
 
 /// 新版本，思想是希望把已经击打过的装甲板中心也用在椭圆拟合上
@@ -296,9 +452,51 @@ bool Detect::getArmorCenter_new(Mat &src, const int bMode, armorData &data, Poin
                 if ((son != -1) && (armorContours[son].size() > 2))//子轮廓ID不为-1，并且该轮廓点集数目必须大于2(才可以获得外接矩形)
                 {
                     RotatedRect son_rect = minAreaRect(armorContours[son]);//锤子中子轮廓（装甲板）的外接矩形
+                    RotatedRect dad_rect = minAreaRect(armorContours[i]);//锤子中子轮廓（装甲板）的外接矩形
                     if (son_rect.center == Point2f(0, 0)) return false;
+                    if (son_rect.size.area() < 50) return false;
+                    data.wLarger = son_rect.size.width > son_rect.size.height; 
+                    data.barycenter = dad_rect.center;
                     Point2f p[4];//装甲板四个点
                     son_rect.points(p);
+                    son_rect.points(data.ArmorCorners);
+                    armorCornerSort(data);
+                    polarData line1, line2;
+                    findSymmetry(armorContours[i], line1, line2);
+                    // circle(src, data.ArmorCorners[0], 2, Scalar(0, 255, 0), 2);
+                    // circle(src, data.ArmorCorners[1], 4, Scalar(0, 255, 0), 2);
+                    // circle(src, data.ArmorCorners[2], 6, Scalar(0, 255, 0), 2);
+                    // circle(src, data.ArmorCorners[3], 8, Scalar(0, 255, 0), 2);
+                    double dist0 = cacuDistanceOfLine(line1, data.ArmorCorners[0]);
+                    double dist1 = cacuDistanceOfLine(line1, data.ArmorCorners[1]);
+                    double dist2 = cacuDistanceOfLine(line1, data.ArmorCorners[2]);
+                    double dist3 = cacuDistanceOfLine(line1, data.ArmorCorners[3]);
+                    if (dist0*dist3 < 0 && dist1*dist2 < 0 && dist0*dist1 > 0 && dist2*dist3 > 0)
+                    {
+                        data.symmetry = line1;
+
+                    }
+                    else 
+                    {
+                        data.symmetry = line2;
+                    }
+                    symmetrys.push_back(data.symmetry);
+
+                    {
+                        double a = cos(data.symmetry.theta);
+                        double b = sin(data.symmetry.theta);
+                        double x0 = data.symmetry.rho * a;
+                        double y0 = data.symmetry.rho * b;
+                        //找出直线上两点       
+                        Point pt1, pt2; 
+                        pt1.x = saturate_cast<int>(x0 - 1000 * b);
+                        pt1.y = saturate_cast<int>(y0 +  1000 * a);
+                        pt2.x = saturate_cast<int>(x0 + 1000 * b);
+                        pt2.y = saturate_cast<int>(y0 - 1000 * a);
+                        line(src, pt1, pt2, Scalar(0, 0, 255), 2);
+                    }
+
+
                     for (int j = 0; j < 4; j++)//画出装甲板矩形
                     {
                         line(src, p[j], p[(j + 1) % 4], Scalar(0, 0, 255), 2, 8);  //绘制最小外接矩形每条边
@@ -313,7 +511,7 @@ bool Detect::getArmorCenter_new(Mat &src, const int bMode, armorData &data, Poin
                         data.preArmorCenter = data.armorCenter;
                     }
                     data.runTime = _tTime.getElapsedTimeInMilliSec();
-                    if(preArmorCentor(data ,0.7,BIG_BUFF) == false)
+                    if(preArmorCentor(data ,0.7,SMALL_BUFF) == false)
                     {
                         return false;
                     }
@@ -462,30 +660,54 @@ bool Detect::getArmorCenter_new(Mat &src, const int bMode, armorData &data, Poin
     //static float radius_sum;
     //static int radius_num;
     float radius_temp=0.0;
-    circleLeastFit(fan_armorCenters, data.R_center, radius_temp);
-
-    if(radius_temp>0.0)
+    if (symmetrys.size() < 15 && initFlag == false)
     {
-        radius_sum+=radius_temp;
-        radius_num++;
+        ransacIntersection(symmetrys, data.R_center);
+        data.radius = distance(data.R_center, data.armorCenter);
     }
+    else 
+    {
+        initFlag = true;
+        symmetrys.clear();
+        Point2f p1(data.armorCenter.x - data.symmetry.theta_sin * data.radius, data.armorCenter.y + data.symmetry.theta_cos * data.radius);
+        Point2f p2(data.armorCenter.x + data.symmetry.theta_sin * data.radius, data.armorCenter.y - data.symmetry.theta_cos * data.radius);
+        if (distance(p1, data.barycenter) < distance(p2, data.barycenter))
+        {
+            data.R_center = p1;
+        }
+        else
+        {
+            data.R_center = p2;
+        }
+        
+    }
+    cout << "symmetrys: " << symmetrys.size() << endl;
 
-    float radius=radius_sum/radius_num;
-    data .radius =radius;
+    // circleLeastFit(fan_armorCenters, data.R_center, radius_temp);
+    
+
+    // if(radius_temp>0.0)
+    // {
+    //     radius_sum+=radius_temp;
+    //     radius_num++;
+    // }
+
+    float radius=data.radius;
+    // data .radius =radius;
     if (sParam.debug) {
-        circle(src, data.armorCenter, 5, Scalar(255, 255, 255), 2);
+        circle(src, data.armorCenter, 3, Scalar(0, 255, 255), 2);
         if(data.preArmorCenter.x != 0 && data.preArmorCenter.y !=0)
         {
-            circle(src , data.preArmorCenter , 5, Scalar(255,0,0),2);
+            // circle(src , data.preArmorCenter , 5, Scalar(255,0,0),2);
         }
        // circle(src, data.preArmorCenter, 5, Scalar(255, 0, 0), 2);
        if(data.predictCenter .x != 0 && data.predictCenter.y != 0)
        {
-           circle(src, data.predictCenter, 5, Scalar(255, 255, 0), 2);
+        //    circle(src, data.predictCenter, 5, Scalar(255, 255, 0), 2);
        }
         if(radius>0)
         {
-            circle(src, data.R_center, 5, Scalar(255, 255, 255), 2);
+            circle(src, data.R_center, 2, Scalar(255, 255, 255), 2);
             circle(src, data.R_center, radius, Scalar(20, 100, 100), 2);
         }
    }

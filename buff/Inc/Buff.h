@@ -17,6 +17,7 @@
 #include <mutex>
 #include <string.h>
 #include "Timestamp.h"
+#include <random>
 
 
 using namespace std;
@@ -62,11 +63,36 @@ class Detect {
         TANGENT = 3
     };
 
+    struct polarData{
+        double rho;
+        double theta;
+        double theta_cos;
+        double theta_sin;
+        polarData(){
+            rho = 0;
+            theta = 0;
+            theta_cos = 0;
+            theta_sin = 1;
+        };
+        void operator=(const polarData& right)
+        {
+            rho = right.rho;
+            theta = right.theta;
+            theta_cos = right.theta_cos;
+            theta_sin = right.theta_sin;
+        }
+    };
+
+
     struct armorData {
         Point2f armorCenter;
         Point2f R_center;
         Point2f preArmorCenter;
         Point2f predictCenter;
+        polarData symmetry;
+        Point2f ArmorCorners[4];
+        Point2f barycenter;
+        bool wLarger;
         double angularVelocity;
         float runTime;
         float radius;
@@ -79,6 +105,8 @@ class Detect {
             R_center = cv::Point2f(0, 0);
             preArmorCenter = cv::Point2f(0,0);
             predictCenter = cv::Point2f(0,0);
+            barycenter = cv::Point2f(0,0);
+            wLarger = false;
             angle = 0;
             radius =0;
             angularVelocity=0;
@@ -153,6 +181,8 @@ private:
     DectParam param;
     switchParam sParam;
     vector<Point2f> fan_armorCenters; // 用来拟合椭圆的装甲板点集
+    vector<polarData> symmetrys;
+    bool initFlag=false;
     // init
     #if( VIDEO_TYPE == 0)
     int mode= RED_CLOCK;
@@ -167,6 +197,10 @@ private:
     bool dirFlag;
 
 private:
+    bool ransacIntersection(const vector<polarData> &lines, Point2f &interPoint);
+    double cacuDistanceOfLine(const polarData &l, Point2f p);
+    void armorCornerSort(armorData &data);
+    void findSymmetry(vector<Point> contour, polarData &symLine1, polarData &symLine2);
     bool isClockwise(armorData &data);
     float distance(const Point2f pt1, const Point2f pt2) {
         return sqrt((pt1.x - pt2.x)*(pt1.x - pt2.x) + (pt1.y - pt2.y)*(pt1.y - pt2.y));

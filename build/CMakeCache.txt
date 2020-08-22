@@ -188,7 +188,7 @@ GLOG_INCLUDE_DIR:PATH=/usr/local/include
 GLOG_LIBRARY:FILEPATH=/usr/local/lib/libglog.a
 
 //Folder contains Google glog
-GLOG_ROOT_DIR:PATH=/usr/local/lib/glog
+GLOG_ROOT_DIR:PATH=
 
 //The directory containing a CMake configuration file for OpenCV.
 OpenCV_DIR:PATH=/usr/local/opencv-4.0.1/lib/cmake/opencv4
