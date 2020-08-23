@@ -18,6 +18,7 @@
 #include <string.h>
 #include "Timestamp.h"
 #include <random>
+#include <deque>
 
 
 using namespace std;
@@ -181,7 +182,7 @@ private:
     DectParam param;
     switchParam sParam;
     vector<Point2f> fan_armorCenters; // 用来拟合椭圆的装甲板点集
-    vector<polarData> symmetrys;
+    deque<polarData> symmetrys;
     bool initFlag=false;
     // init
     #if( VIDEO_TYPE == 0)
@@ -197,7 +198,7 @@ private:
     bool dirFlag;
 
 private:
-    bool ransacIntersection(const vector<polarData> &lines, Point2f &interPoint);
+    bool ransacIntersection(const deque<polarData> &lines, Point2f &interPoint, double &meanError);
     double cacuDistanceOfLine(const polarData &l, Point2f p);
     void armorCornerSort(armorData &data);
     void findSymmetry(vector<Point> contour, polarData &symLine1, polarData &symLine2);

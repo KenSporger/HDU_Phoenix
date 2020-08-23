@@ -157,7 +157,7 @@ int main(int argc, char const *argv[])
             detect.detect_new(dst);
         }
         cv::imshow("src1", dst);
-        waitKey(100);
+        waitKey(0);
 
     }
 }

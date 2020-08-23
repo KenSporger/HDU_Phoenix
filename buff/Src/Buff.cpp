@@ -309,7 +309,7 @@ void Detect::findSymmetry(vector<Point> contour, polarData &symLine1, polarData 
     symLine2.rho = symLine2.theta_cos * mean_x + symLine2.theta_sin * mean_y;
 }
 
-bool Detect::ransacIntersection(const vector<polarData> &lines, Point2f &interPoint)
+bool Detect::ransacIntersection(const deque<polarData> &lines, Point2f &interPoint, double &meanError)
 {
 	int linesAmount = lines.size();    
 	int maxIterCnt = linesAmount / 2;  //最大迭代次数
@@ -377,6 +377,8 @@ bool Detect::ransacIntersection(const vector<polarData> &lines, Point2f &interPo
 		}
 		iter++;
 	}
+    meanError = modelMeanError;
+    cout << "meanError: " << meanError << endl;
 	return true;
 }
 
@@ -660,9 +662,14 @@ bool Detect::getArmorCenter_new(Mat &src, const int bMode, armorData &data, Poin
     //static float radius_sum;
     //static int radius_num;
     float radius_temp=0.0;
-    if (symmetrys.size() < 15 && initFlag == false)
+    double symmetryError = 1;
+    while(symmetrys.size() > 30)
     {
-        ransacIntersection(symmetrys, data.R_center);
+        symmetrys.pop_front();
+    }
+    if (initFlag == false && symmetryError > 0.3)
+    {
+        ransacIntersection(symmetrys, data.R_center, symmetryError);
         data.radius = distance(data.R_center, data.armorCenter);
     }
     else 
