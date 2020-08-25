@@ -25,7 +25,7 @@
 #define PI (3.14159265459)
 
 cv::Mat img = cv::Mat(480, 640, CV_8UC3, (0, 0, 0));
-cv::VideoCapture video("../video/armorblue.mp4");
+cv::VideoCapture video("../video/armormini.mp4");
 ArmorDetector Arm;
 Serial serial;
 
@@ -77,7 +77,7 @@ int main(int argc, char const *argv[])
     // }
 
     DLOG_INFO << "arm begin";
-
+    // Arm.tesseractInit();
     while (1)
     {
         video >> img;
@@ -119,9 +119,6 @@ int main(int argc, char const *argv[])
             DLOG_INFO << "can't find enemy";
         }
 
-        if (cv::waitKey(10) >= 0)
-        {
-            break;
-        }
+        cv::waitKey(0);
     }
 }

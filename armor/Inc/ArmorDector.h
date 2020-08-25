@@ -4,6 +4,9 @@
 #include <array>
 #include "general.h"
 #include <opencv2/ml.hpp>
+#include <gamma.h>
+// #include <tesseract/baseapi.h>
+// #include <leptonica/allheaders.h>
 
 #define GET_ARMOR_PIC
 #define SHOW_RESULT
@@ -264,6 +267,8 @@ public:
 	*	@Return: 0 for small armor, 1 for big armor
 	*	@Others: API for client
 	*/
+
+	// void tesseractInit();
 	int getArmorType() const;
 
 	cv::Point getCenterPoint() const;
@@ -288,6 +293,7 @@ private:
 	std::vector<ArmorDescriptor> _armors;
 
 	ArmorDescriptor _targetArmor; //relative coordinates
+	// tesseract::TessBaseAPI tess;
 
 	int _flag;
 	bool _isTracking;
@@ -296,6 +302,7 @@ private:
 	std::string _debugWindowName = "as";
 	cv::Mat _debugImg;
 	//#endif // DEBUG_DETECTION || SHOW_RESULT
+	int detectArmorNumber(const ArmorDescriptor &armor);
 
 #ifdef GET_ARMOR_PIC
 	int _allCnt = 0;

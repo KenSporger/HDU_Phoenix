@@ -45,6 +45,23 @@ cv::RotatedRect &adjustRec(cv::RotatedRect &rec, const int mode)
 
 	return rec;
 }
+
+// void ArmorDetector::tesseractInit()
+// {
+// 	tess.Init(NULL, "eng");
+// }
+
+int ArmorDetector::detectArmorNumber(const ArmorDescriptor &armor)
+{
+	Mat roi;
+	gammaCorrect(armor.frontImg, roi, 1/2.2);
+	// tess.SetImage((uchar*)roi.data, roi.cols, roi.rows, 3, roi.cols*3);
+	// char* out = tess.GetUTF8Text();
+    // std::cout <<"number: "<< out << std::endl;
+	imshow("roi", roi);
+	return 0;
+}
+
 //ɸѡ�ƹܺ���
 int ArmorDetector::detect()
 {
@@ -257,6 +274,7 @@ int ArmorDetector::detect()
 	//calculate the final score
 	for (auto &armor : _armors)
 	{
+		detectArmorNumber(armor);
 		armor.finalScore = armor.sizeScore + armor.distScore + armor.rotationScore;
 	}
 

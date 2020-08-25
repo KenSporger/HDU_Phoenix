@@ -21,9 +21,11 @@ set(INC_DIRS # /home/wzx/HDU_Phoenix/buff/Inc
              main/Inc
              serials/Inc
              general/Inc
-             utilities/Inc)
+             utilities/Inc
+             /usr/include)
 
-set(LIB_DIRS ${PROJECT_SOURCE_DIR}/camera/lib)
+set(LIB_DIRS /usr/lib/x86_64-linux-gnu
+            ${PROJECT_SOURCE_DIR}/camera/lib)
 
 
 
@@ -36,12 +38,14 @@ find_package(OpenCV REQUIRED)
 find_package(Glog REQUIRED)
 
 add_executable(RM_CV test.cpp armor/Src/ArmorDector.cpp
+                            armor/Src/gamma.cpp
                             camera/Src/camera_wrapper.cpp
                             main/Src/img_buffer.cpp
                             main/Src/ImgProdCons.cpp
                             serials/Src/serial.cpp
                             utilities/Src/opencv_extend.cpp
-                            camera/Src/camera.cpp)
+                            camera/Src/camera.cpp
+                            )
 
 #链接
 target_link_libraries(RM_CV ${LIB_DIRS}   libGCBase_gcc421_v3_0.so
@@ -55,8 +59,10 @@ target_link_libraries(RM_CV ${LIB_DIRS}   libGCBase_gcc421_v3_0.so
                                         libMVRender.so  
                                         libMvUsb3vTL.so 
                                         libNodeMapData_gcc421_v3_0.so  
-                                        libXmlParser_gcc421_v3_0.so)
-
+                                        libXmlParser_gcc421_v3_0.so
+                                        libtesseract.so
+                                        liblept.so
+                                        )
 
 target_link_libraries(RM_CV ${OpenCV_LIBS} ${GLOG_LIBRARY})
 target_link_libraries(RM_CV Threads::Threads)
